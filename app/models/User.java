@@ -117,6 +117,15 @@ public class User extends Model {
                 return user;
             }
         }
+        else{
+            user = find.where().eq("user_name", email).findUnique();
+            if (user != null) {
+                // get the hash password from the salt + clear password
+                if (Hash.checkPassword(clearPassword, user.passwordHash)) {
+                    return user;
+                }
+            }
+        }
         return null;
     }
 

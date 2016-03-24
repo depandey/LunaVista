@@ -133,6 +133,12 @@ public class Signup extends Controller {
 
     public Result update(String auth_key){
         User user = User.findByAuthKey(auth_key);
+        if(user == null){
+            return jsonResult(ok(play.libs.Json.toJson
+                    (models.Response.responseBuilder.aresponse().
+                            withStatus(Messages.get("application.response.status.failure")).
+                            withMessage(Messages.get("invalid auth token")).build())));
+        }
         JsonNode jsonNode = request().body().asJson();
         if(null == jsonNode){
             return jsonResult(ok(play.libs.Json.toJson
