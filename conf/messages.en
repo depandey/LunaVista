@@ -1,0 +1,96 @@
+title=BetFilter
+
+confirm=Confirmation
+email=Email
+userName=Full Name
+goback=Go Back
+logout=Logout
+password=Password
+error.technical=Technical Error, please Retry
+validate=Validate
+reset=Reset
+
+account.not.validated.check.mail=Account not validated. Check your emails.
+account.successfully.validated=Account successfully validated
+account.settings.email.successful=Email successfully validated ({0})
+invalid.user.or.password=Invalid user or password
+youve.been.logged.out=You've been logged out
+error.sending.email=Error sending email
+error.sending.confirm.email=Error while sending confirmation mail
+error.email.already.exist=Email already exist
+error.account.already.validated=Account already validated
+error.unknown.email=Unknown email
+error.confirm=Confirmation failed
+error.expiredresetlink=This password reset has expired.
+error.expiredmaillink=This mail change has expired.
+
+account.settings.password=Click OK to receive instructions by mail.
+account.settings.email=Enter your new email address. Click OK to receive instructions on this new mail.
+
+signin.signin=Sign In
+signin.your.email=Your email address
+signin.your.password=Your password
+
+forgot.password=Forgot password ?
+
+signup.signup=Sign Up
+signup.successfull=Sign Up - Successful !
+signup.new=New ?
+signup.reset.password=Reset your password
+signup.generate.password=Generate a password
+signup.msg.created=You will receive a confirmation email soon. Check your email to activate your account.
+signup.valid.email=Invalid Email
+
+resetpassword=Reset Password
+resetpassword.mailsent=A mail has been sent, please check your mail.
+resetpassword.success=Your password has been reset.
+resetpassword.new.password=New password :
+
+changemail.mailsent=A mail has been sent, please check your mail.
+
+mail.confirm.subject=Welcome to BetFilter - Ask for confirmation
+mail.confirm.message=Welcome to BetFilter. <br> Click on this link : {0} to confirm your email.
+
+mail.welcome.subject=Welcome to BetFilter
+mail.welcome.message=Welcome to BetFilter. <br> Your account is validated. Enjoy !
+
+mail.reset.ask.subject=BetFilter - New password
+# Cannot use You've unescaped here, as the single quote stops the {0}
+mail.reset.ask.message=You asked for your password to be reset.  <br> Click on this link : {0} to change your password.
+
+mail.change.ask.subject=BetFilter - Validate email
+mail.change.ask.message=You asked for your email to be changed.  <br> Click on this link : {0} to validate your email.
+
+mail.reset.fail.subject=Account Access Attempted
+mail.reset.fail.message=You (or someone else) entered this email address when trying to change the password.  However, this email address is not on our list of registered users, and so the attempted password reset has failed.
+
+mail.reset.confirm.subject=BetFilter - New password
+mail.reset.confirm.message=Hello, <br><br> Your password has been reset.
+
+application.response.status.success=success
+application.response.status.success.message.SUCCESS_01=login successful
+application.response.status.success.message.SUCCESS_02=logout successful
+application.response.status.success.message.SUCCESS_03=Your Account is Successfully Created. please check email to activate your account
+application.response.status.success.message.SUCCESS_04=password reset link send to your email address
+application.response.status.success.message.SUCCESS_05=password changed successfully
+application.response.status.failure=failure
+application.response.status.failure.message.ERROR_01=invalid email address or password
+application.response.status.failure.message.ERROR_02=technical error. please check config
+application.response.status.failure.message.ERROR_03=invalid/expired authorization key
+application.response.status.failure.message.ERROR_04=account not validated check email
+application.response.status.failure.message.ERROR_05=email address already taken
+application.response.status.failure.message.ERROR_06=cannot verify email address
+application.response.status.failure.message.ERROR_07=invalid email or request
+application.response.status.failure.message.ERROR_09=no user found with email
+application.response.status.failure.message.ERROR_10=cannot send email
+application.response.status.failure.message.ERROR_11=invalid request
+application.response.status.failure.message.ERROR_12=cannot validate url
+application.response.status.failure.message.ERROR_13=password change error
+application.response.status.failure.message.ERROR_14=unable to send password change notification to email address
+
+add.url=Add Urls
+input.urls=urls
+add.blocking.urls=Add betting urls
+added.blocking.urls=Successfully added the urls to the list
+
+

@@ -1,0 +1,30 @@
+@(user: User, urlForm: Form[Dashboard.Urls])
+
+@import helper._
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.render) }
+@main(user) {
+<h3>@Messages("add.url")</h3>
+
+@form(routes.Dashboard.addUrls(), 'class -> "form") {
+    @wflash()
+    @if(urlForm.hasGlobalErrors) {
+        <p class="error">
+            <span class="label label-danger">@urlForm.globalError.message</span>
+        </p>
+    }
+
+    <fieldset>
+        @inputText(
+            urlForm("url"),
+            'placeholder -> Messages("input.urls"),
+            '_label -> null,
+            '_help -> Messages("add.blocking.urls"),
+            'class -> "form-control"
+        )
+    </fieldset>
+
+    <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="@Messages("add.url")">
+    </div>
+}
+}
