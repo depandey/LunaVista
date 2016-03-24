@@ -19,6 +19,7 @@ POST    /settings/email             controllers.account.settings.Email.runEmail(
 # Registers the user, sending an email to confirm the account.
 GET     /signup                     controllers.account.Signup.create()
 POST    /signup                     controllers.account.Signup.save()
+POST    /signup/update/:auth_key    controllers.account.Signup.update(auth_key:String)
 
 # Accessed when the user confirms the registration.
 GET     /confirm/:confirmToken      controllers.account.Signup.confirm(confirmToken:String)

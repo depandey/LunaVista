@@ -1,5 +1,6 @@
 package controllers.account;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.Application;
 import models.User;
 import models.utils.AppException;
@@ -82,9 +83,7 @@ public class Signup extends Controller {
         Form<Application.Register> registerForm = form(Application.Register.class).bindFromRequest();
 
         if (registerForm.hasErrors()) {
-            //return badRequest(create.render(registerForm));
-            //return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"invalid request\"}"));
-            return jsonResult(ok(play.libs.Json.toJson
+              return jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_11")).build())));
@@ -101,41 +100,75 @@ public class Signup extends Controller {
             User user = new User();
             user.email = register.email;
             user.userName = register.userName;
-            user.firstName = register.firstName;
-            user.lastName = register.lastName;
+          /*  user.firstName = register.firstName;
+            user.lastName = register.lastName;*/
             user.passwordHash = Hash.createPassword(register.inputPassword);
             user.confirmationToken = UUID.randomUUID().toString();
             user.auth_key = UUID.randomUUID().toString()+ user.passwordHash;
 
             user.save();
-            //sendMailAskForConfirmation(user);
-
             String urlString = "http://" + Configuration.root().getString("server.hostname");
             urlString += "/confirm/" + user.confirmationToken;
             URL url = new URL(urlString);
             WSRequest request = ws.url(urlString);
                 if (User.confirm(user)) {
-                   // sendMailConfirmation(user);
-                    //flash("success", Messages.get("account.successfully.validated"));
-                    //return ok(confirm.render());
-                    return jsonResult(ok("{\"status\" : \"success\", \"message\" : \"account successfully created\"}"));
+                    return Application.jsonResult(ok(play.libs.Json.toJson
+                            (models.Response.responseBuilder.aresponse().
+                                    withStatus(Messages.get("application.response.status.success")).
+                                    withData(user).
+                                    withMessage(Messages.get("signup successful")).build())));
                 } else {
                     Logger.debug("Signup.confirm cannot confirm user");
-                    //flash("error", Messages.get("error.confirm"));
                     return badRequest(confirm.render());
-                    //return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"confirmation failed\"}"));
                 }
         }
         catch (Exception e) {
             Logger.error("Signup.save error", e);
-            //flash("error", Messages.get("error.technical"));
-           //return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"technical error. check config\"}"));
-            return jsonResult(ok(play.libs.Json.toJson
+             return jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_02")).build())));
         }
-        //return badRequest(create.render(registerForm));
+    }
+
+    public Result update(String auth_key){
+        User user = User.findByAuthKey(auth_key);
+        JsonNode jsonNode = request().body().asJson();
+        if(null == jsonNode){
+            return jsonResult(ok(play.libs.Json.toJson
+                    (models.Response.responseBuilder.aresponse().
+                            withStatus(Messages.get("application.response.status.failure")).
+                            withMessage(Messages.get("please provide data")).build())));
+        }
+        else{
+            String firstName = jsonNode.findPath("firstName").asText();
+            if(null == firstName && firstName.trim().isEmpty()){
+                return jsonResult(ok(play.libs.Json.toJson
+                        (models.Response.responseBuilder.aresponse().
+                                withStatus(Messages.get("application.response.status.failure")).
+                                withMessage(Messages.get("first name should not be empty")).build())));
+            }
+            else{
+                user.firstName = firstName;
+            }
+            String lastName = jsonNode.findPath("lastName").asText();
+            if(null == lastName && lastName.trim().isEmpty()){
+                return jsonResult(ok(play.libs.Json.toJson
+                        (models.Response.responseBuilder.aresponse().
+                                withStatus(Messages.get("application.response.status.failure")).
+                                withMessage(Messages.get("last name should not be empty")).build())));
+            }
+            else{
+                user.lastName = lastName;
+                user.update();
+                return Application.jsonResult(ok(play.libs.Json.toJson
+                        (models.Response.responseBuilder.aresponse().
+                                withStatus(Messages.get("application.response.status.success")).
+                                withData(user).
+                                withMessage(Messages.get("update successful")).build())));
+            }
+        }
+
     }
 
     /**
@@ -148,16 +181,12 @@ public class Signup extends Controller {
     private Result checkBeforeSave(Form<Application.Register> registerForm, String email) {
         // Check unique email
         if (User.findByEmail(email) != null) {
-            //flash("error", Messages.get("error.email.already.exist"));
-           //return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"email address already taken\"}"));
-            return jsonResult(ok(play.libs.Json.toJson
+             return jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_05")).build())));
-           // return badRequest(create.render(registerForm));
         }
         else if(!verifyEmailAddress(email)){
-           // return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"cannot verify email address\"}"));
             return jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
@@ -205,15 +234,11 @@ public class Signup extends Controller {
     public Result confirm(String token) {
         User user = User.findByConfirmationToken(token);
         if (user == null) {
-            //flash("error", Messages.get("error.unknown.email"));
             return badRequest(confirm.render());
-           // return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"unknow email\"}"));
         }
 
         if (user.validated) {
-           // flash("error", Messages.get("error.account.already.validated"));
             return badRequest(confirm.render());
-            //return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"account already validated\"}"));
         }
 
         try {
@@ -221,12 +246,9 @@ public class Signup extends Controller {
                 sendMailConfirmation(user);
                 flash("success", Messages.get("account.successfully.validated"));
                 return ok(confirm.render());
-                //return jsonResult(ok("{\"status\" : \"success\", \"message\" : \"account successfully validated\"}"));
             } else {
                 Logger.debug("Signup.confirm cannot confirm user");
-                //flash("error", Messages.get("error.confirm"));
                 return badRequest(confirm.render());
-                //return jsonResult(ok("{\"status\" : \"failure\", \"message\" : \"confirmation failed\"}"));
             }
         } catch (AppException e) {
             Logger.error("Cannot signup", e);

@@ -144,10 +144,10 @@ public class Application extends Controller {
         @Constraints.Required
         public String inputPassword;
 
-        @Constraints.Required
+        //@Constraints.Required
         public String firstName;
 
-        @Constraints.Required
+        //@Constraints.Required
         public String lastName;
 
         /**
