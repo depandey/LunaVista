@@ -14,13 +14,11 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.account.reset.ask;
-import play.libs.mailer.Email;
 import play.libs.mailer.MailerClient;
 
 import javax.inject.Inject;
 
 import views.html.account.reset.reset;
-import views.html.account.reset.runAsk;
 
 import java.net.MalformedURLException;
 import java.util.UUID;
@@ -192,8 +190,8 @@ public class Reset extends Controller {
                                         withStatus(Messages.get("application.response.status.failure")).
                                         withMessage(Messages.get("application.response.status.failure.message.ERROR_11")).build())));
                     } else {
-                        user.passwordHash = Hash.createPassword(password);
-                        user.auth_key = UUID.randomUUID().toString()+ user.passwordHash;
+                        user.passwordhash = Hash.createPassword(password);
+                        user.auth_key = UUID.randomUUID().toString()+ user.passwordhash;
                         user.save();
                         // Send email saying that the password has just been changed.
                         sendPasswordChanged(user);

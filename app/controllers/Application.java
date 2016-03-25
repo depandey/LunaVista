@@ -4,18 +4,14 @@ import models.Urls;
 import models.User;
 import models.utils.AppException;
 import play.Logger;
-import play.api.libs.json.Json;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Security;
 import views.html.admin;
 import views.html.index;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -138,6 +134,8 @@ public class Application extends Controller {
         //@Constraints.Required
         public String lastname;
 
+        public String country;
+
         /**
          * Validate the authentication.
          *
@@ -154,6 +152,9 @@ public class Application extends Controller {
 
             if (isBlank(inputpassword)) {
                 return "Password is required";
+            }
+            if(isBlank(country)){
+                return "Country is required";
             }
 
             return null;
@@ -194,7 +195,7 @@ public class Application extends Controller {
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_02")).build())));
             }
             if(user != null){
-                user.auth_key = UUID.randomUUID().toString()+ user.passwordHash;
+                user.auth_key = UUID.randomUUID().toString()+ user.passwordhash;
                 user.save();
                 session("email", loginForm.get().email);
                 return (user.admin == true)? GO_DASHBOARD: Application.jsonResult(ok(play.libs.Json.toJson

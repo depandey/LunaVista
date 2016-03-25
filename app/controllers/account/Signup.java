@@ -2,6 +2,7 @@ package controllers.account;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.Application;
+import models.Response;
 import models.User;
 import models.utils.AppException;
 import models.utils.Hash;
@@ -23,14 +24,13 @@ import views.html.account.signup.confirm;
 import views.html.account.signup.create;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
-import javax.inject.Inject;
 
-import play.mvc.*;
 import play.libs.ws.*;
-import play.libs.F.Function;
-import play.libs.F.Promise;
+
 import static play.data.Form.form;
 
 /**
@@ -98,14 +98,15 @@ public class Signup extends Controller {
         }
 
         try {
+            System.out.println(play.libs.Json.toJson(register));
             User user = new User();
             user.email = register.email;
-            user.userName = register.username;
-            user.passwordHash = Hash.createPassword(register.inputpassword);
-            user.confirmationToken = UUID.randomUUID().toString();
-            user.auth_key = UUID.randomUUID().toString()+ user.passwordHash;
-            JsonNode jsonNode = request().body().asJson();
-            String country = jsonNode.findPath("country").asText();
+            user.username = register.username;
+            user.passwordhash = Hash.createPassword(register.inputpassword);
+            user.confirmationtoken = UUID.randomUUID().toString();
+            user.auth_key = UUID.randomUUID().toString()+ user.passwordhash;
+            user.dateCreation = new Date();
+            String country = register.country;
             if(null == country || country.trim().isEmpty()){
                 return jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
@@ -132,14 +133,15 @@ public class Signup extends Controller {
             }
             user.save();
             String urlString = "http://" + Configuration.root().getString("server.hostname");
-            urlString += "/confirm/" + user.confirmationToken;
+            urlString += "/confirm/" + user.confirmationtoken;
             URL url = new URL(urlString);
             WSRequest request = ws.url(urlString);
+            User.SignUpUserResponseBuilder signUpUserResponseBuilder = new User.SignUpUserResponseBuilder(user);
                 if (User.confirm(user)) {
                     return Application.jsonResult(ok(play.libs.Json.toJson
                             (models.Response.responseBuilder.aresponse().
                                     withStatus(Messages.get("application.response.status.success")).
-                                    withData(user).
+                                    withData(signUpUserResponseBuilder).
                                     withMessage(Messages.get("signup successful")).build())));
                 } else {
                     Logger.debug("Signup.confirm cannot confirm user");
@@ -153,6 +155,12 @@ public class Signup extends Controller {
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_02")).build())));
         }
+    }
+
+    private String getDate(Date date) {
+        SimpleDateFormat formatter;
+        formatter = new SimpleDateFormat("dd-MM-yyyy");
+        return formatter.format(date);
     }
 
     public Result update(String auth_key){
@@ -179,7 +187,7 @@ public class Signup extends Controller {
                                 withMessage(Messages.get("first name should not be empty")).build())));
             }
             else{
-                user.firstName = firstName;
+                user.firstname = firstName;
             }
             String lastName = jsonNode.findPath("lastname").asText();
             if(null == lastName || lastName.trim().isEmpty()){
@@ -189,7 +197,7 @@ public class Signup extends Controller {
                                 withMessage(Messages.get("last name should not be empty")).build())));
             }
             else{
-                user.lastName = lastName;
+                user.lastname = lastName;
             }
             user.update();
             return Application.jsonResult(ok(play.libs.Json.toJson
@@ -253,7 +261,7 @@ public class Signup extends Controller {
         String subject = Messages.get("mail.confirm.subject");
 
         String urlString = "http://" + Configuration.root().getString("server.hostname");
-        urlString += "/confirm/" + user.confirmationToken;
+        urlString += "/confirm/" + user.confirmationtoken;
         URL url = new URL(urlString); // validate the URL, will throw an exception if bad.
         String message = Messages.get("mail.confirm.message", url.toString());
 

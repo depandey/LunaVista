@@ -9,6 +9,7 @@ import com.avaje.ebean.Model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -30,13 +31,13 @@ public class User extends Model {
     @Constraints.Required
     @Constraints.MinLength(2)
     @Constraints.MaxLength(100)
-    public String firstName;
+    public String firstname;
 
     @Column(length = 100, nullable = true)
     @Constraints.Required
     @Constraints.MinLength(2)
     @Constraints.MaxLength(100)
-    public String lastName;
+    public String lastname;
 
     @Column(length = 100, nullable = true)
     @Constraints.Required
@@ -48,16 +49,16 @@ public class User extends Model {
     @Constraints.Required
     @Formats.NonEmpty
     @Column(unique = true)
-    public String userName;
+    public String username;
 
-    public String confirmationToken;
+    public String confirmationtoken;
 
     @Constraints.Required
     @Formats.NonEmpty
-    public String passwordHash;
+    public String passwordhash;
 
-    @Formats.DateTime(pattern = "yyyy-MM-dd")
-    public Date dateCreation = new Date();
+    @Formats.DateTime(pattern = "dd-MM-yyyy")
+    public Date dateCreation;
 
     @Formats.NonEmpty
     public Boolean validated = false;
@@ -86,13 +87,13 @@ public class User extends Model {
     }
 
     /**
-     * Retrieve a user from a userName.
+     * Retrieve a user from a username.
      *
      * @param userName Full name
      * @return a user
      */
     public static User findByUserName(String userName) {
-        return find.where().eq("user_name", userName).findUnique();
+        return find.where().eq("username", userName).findUnique();
     }
 
     /**
@@ -102,7 +103,7 @@ public class User extends Model {
      * @return a user if the confirmation token is found, null otherwise.
      */
     public static User findByConfirmationToken(String token) {
-        return find.where().eq("confirmationToken", token).findUnique();
+        return find.where().eq("confirmationtoken", token).findUnique();
     }
 
     /**
@@ -119,15 +120,15 @@ public class User extends Model {
         User user = find.where().eq("email", email).findUnique();
         if (user != null) {
             // get the hash password from the salt + clear password
-            if (Hash.checkPassword(clearPassword, user.passwordHash)) {
+            if (Hash.checkPassword(clearPassword, user.passwordhash)) {
                 return user;
             }
         }
         else{
-            user = find.where().eq("user_name", email).findUnique();
+            user = find.where().eq("username", email).findUnique();
             if (user != null) {
                 // get the hash password from the salt + clear password
-                if (Hash.checkPassword(clearPassword, user.passwordHash)) {
+                if (Hash.checkPassword(clearPassword, user.passwordhash)) {
                     return user;
                 }
             }
@@ -136,7 +137,7 @@ public class User extends Model {
     }
 
     public void changePassword(String password) throws AppException {
-        this.passwordHash = Hash.createPassword(password);
+        this.passwordhash = Hash.createPassword(password);
         this.save();
     }
 
@@ -151,7 +152,7 @@ public class User extends Model {
             return false;
         }
 
-        user.confirmationToken = null;
+        user.confirmationtoken = null;
         user.validated = true;
         user.save();
         return true;
@@ -169,5 +170,65 @@ public class User extends Model {
             return null;
         }
     }
+    public static class SignUpUserResponseBuilder {
+        private String email;
+        private String country;
+        private String username;
+        private String createdon;
 
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getCreatedon() {
+            return createdon;
+        }
+
+        public void setCreatedon(String createdon) {
+            this.createdon = createdon;
+        }
+
+        public String getAuth_key() {
+            return auth_key;
+        }
+
+        public void setAuth_key(String auth_key) {
+            this.auth_key = auth_key;
+        }
+
+        private String auth_key;
+
+        private String getDate(Date date) {
+            SimpleDateFormat formatter;
+            formatter = new SimpleDateFormat("dd-MM-yyyy");
+            return formatter.format(date);
+        }
+        public SignUpUserResponseBuilder(User user){
+            this.email = user.email;
+            this.country = user.country;
+            this.auth_key = user.auth_key;
+            this.createdon = getDate(user.dateCreation);
+            this.username = user.username;
+        }
+    }
 }

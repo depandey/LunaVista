@@ -3,6 +3,9 @@ package models;
 import com.avaje.ebean.Model;
 import models.User;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by 609108084 on 07/03/2016.
  */
@@ -54,6 +57,10 @@ public class Response {
         }
 
         public responseBuilder withData(Object data) {
+            if(data instanceof User.SignUpUserResponseBuilder){
+                this.data = data;
+                return this;
+            }
             this.data = data;
             return this;
         }
