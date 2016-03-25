@@ -23,6 +23,7 @@ import views.html.account.signup.confirm;
 import views.html.account.signup.create;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.UUID;
 import javax.inject.Inject;
 
@@ -90,7 +91,7 @@ public class Signup extends Controller {
         }
 
         Application.Register register = registerForm.get();
-        Result resultError = checkBeforeSave(registerForm, register.email);
+        Result resultError = checkBeforeSave(registerForm, register.email,register.username);
 
         if (resultError != null) {
             return resultError;
@@ -99,13 +100,36 @@ public class Signup extends Controller {
         try {
             User user = new User();
             user.email = register.email;
-            user.userName = register.userName;
-          /*  user.firstName = register.firstName;
-            user.lastName = register.lastName;*/
-            user.passwordHash = Hash.createPassword(register.inputPassword);
+            user.userName = register.username;
+            user.passwordHash = Hash.createPassword(register.inputpassword);
             user.confirmationToken = UUID.randomUUID().toString();
             user.auth_key = UUID.randomUUID().toString()+ user.passwordHash;
-
+            JsonNode jsonNode = request().body().asJson();
+            String country = jsonNode.findPath("country").asText();
+            if(null == country || country.trim().isEmpty()){
+                return jsonResult(ok(play.libs.Json.toJson
+                        (models.Response.responseBuilder.aresponse().
+                                withStatus(Messages.get("application.response.status.failure")).
+                                withMessage(Messages.get("country should not be empty")).build())));
+            }
+            else{
+                String[] locales = Locale.getISOCountries();
+                boolean isValidCountry = false;
+                for(String countryCode: locales) {
+                    Locale obj = new Locale("", countryCode);
+                    if(obj.getDisplayCountry().equalsIgnoreCase(country))
+                        isValidCountry = true;
+                }
+                if(isValidCountry) {
+                    user.country = country;
+                }
+                else{
+                    return jsonResult(ok(play.libs.Json.toJson
+                            (models.Response.responseBuilder.aresponse().
+                                    withStatus(Messages.get("application.response.status.failure")).
+                                    withMessage(Messages.get("country name does not exist")).build())));
+                }
+            }
             user.save();
             String urlString = "http://" + Configuration.root().getString("server.hostname");
             urlString += "/confirm/" + user.confirmationToken;
@@ -147,8 +171,8 @@ public class Signup extends Controller {
                             withMessage(Messages.get("please provide data")).build())));
         }
         else{
-            String firstName = jsonNode.findPath("firstName").asText();
-            if(null == firstName && firstName.trim().isEmpty()){
+            String firstName = jsonNode.findPath("firstname").asText();
+            if(null == firstName || firstName.trim().isEmpty()){
                 return jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
@@ -157,8 +181,8 @@ public class Signup extends Controller {
             else{
                 user.firstName = firstName;
             }
-            String lastName = jsonNode.findPath("lastName").asText();
-            if(null == lastName && lastName.trim().isEmpty()){
+            String lastName = jsonNode.findPath("lastname").asText();
+            if(null == lastName || lastName.trim().isEmpty()){
                 return jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
@@ -166,13 +190,13 @@ public class Signup extends Controller {
             }
             else{
                 user.lastName = lastName;
-                user.update();
-                return Application.jsonResult(ok(play.libs.Json.toJson
-                        (models.Response.responseBuilder.aresponse().
-                                withStatus(Messages.get("application.response.status.success")).
-                                withData(user).
-                                withMessage(Messages.get("update successful")).build())));
             }
+            user.update();
+            return Application.jsonResult(ok(play.libs.Json.toJson
+                    (models.Response.responseBuilder.aresponse().
+                            withStatus(Messages.get("application.response.status.success")).
+                            withData(user).
+                            withMessage(Messages.get("update successful")).build())));
         }
 
     }
@@ -181,16 +205,23 @@ public class Signup extends Controller {
      * Check if the email already exists.
      *
      * @param registerForm User Form submitted
-     * @param email        email address
-     * @return Index if there was a problem, null otherwise
+     * @param email
+     *@param user_name
+     * email address  @return Index if there was a problem, null otherwise
      */
-    private Result checkBeforeSave(Form<Application.Register> registerForm, String email) {
+    private Result checkBeforeSave(Form<Application.Register> registerForm, String email, String user_name) {
         // Check unique email
         if (User.findByEmail(email) != null) {
              return jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_05")).build())));
+        }
+        else if(User.findByUserName(user_name) != null){
+            return jsonResult(ok(play.libs.Json.toJson
+                    (models.Response.responseBuilder.aresponse().
+                            withStatus(Messages.get("application.response.status.failure")).
+                            withMessage(Messages.get("user name already taken")).build())));
         }
         else if(!verifyEmailAddress(email)){
             return jsonResult(ok(play.libs.Json.toJson

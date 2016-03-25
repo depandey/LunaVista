@@ -26,17 +26,23 @@ public class User extends Model {
     @Column(unique = true)
     public String email;
 
-    @Column(length = 256, nullable = false)
+    @Column(length = 100, nullable = true)
     @Constraints.Required
     @Constraints.MinLength(2)
-    @Constraints.MaxLength(256)
+    @Constraints.MaxLength(100)
     public String firstName;
 
-    @Column(length = 256, nullable = false)
+    @Column(length = 100, nullable = true)
     @Constraints.Required
     @Constraints.MinLength(2)
-    @Constraints.MaxLength(256)
+    @Constraints.MaxLength(100)
     public String lastName;
+
+    @Column(length = 100, nullable = true)
+    @Constraints.Required
+    @Constraints.MinLength(2)
+    @Constraints.MaxLength(100)
+    public String country;
 
 
     @Constraints.Required
@@ -86,7 +92,7 @@ public class User extends Model {
      * @return a user
      */
     public static User findByUserName(String userName) {
-        return find.where().eq("userName", userName).findUnique();
+        return find.where().eq("user_name", userName).findUnique();
     }
 
     /**

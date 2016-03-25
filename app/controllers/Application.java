@@ -61,12 +61,6 @@ public class Application extends Controller {
             User user = User.findByEmail(email);
             if (user != null && user.validated) {
                 return GO_DASHBOARD;
-                //return jsonResult(ok(STATUS_SUCCESS + play.libs.Json.toJson(user) + LOGIN_SUCCESS ));
-                /*return jsonResult(ok(play.libs.Json.toJson
-                                    (models.Response.responseBuilder.aresponse().
-                                            withStatus(Messages.get("application.response.status.success")).
-                                            withData(user).
-                                            withMessage(Messages.get("application.response.status.success.message.SUCCESS_01")).build())));*/
             } else {
                 Logger.debug("Clearing invalid session credentials");
                 session().clear();
@@ -106,23 +100,17 @@ public class Application extends Controller {
             try {
                 user = User.authenticate(email, password);
             } catch (AppException e) {
-                //return Messages.get("error.technical");
-                //return ok("{\"status\" : \"failure\", \"message\" : \"technical error. please check config\"}");
                 return Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_02")).build())));
             }
             if (user == null) {
-               // return Messages.get("invalid.user.or.password");
-                //return ok("{\"status\" : \"failure\", \"message\" : \"invalid user name or password\"}");
                 return Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_01")).build())));
             } else if (!user.validated) {
-               // return Messages.get("account.not.validated.check.mail");
-               // return ok("{\"status\" : \"failure\", \"message\" : \"account not validated check email\"}");
                 return Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
@@ -139,16 +127,16 @@ public class Application extends Controller {
         public String email;
 
         @Constraints.Required
-        public String userName;
+        public String username;
 
         @Constraints.Required
-        public String inputPassword;
+        public String inputpassword;
 
         //@Constraints.Required
-        public String firstName;
+        public String firstname;
 
         //@Constraints.Required
-        public String lastName;
+        public String lastname;
 
         /**
          * Validate the authentication.
@@ -160,11 +148,11 @@ public class Application extends Controller {
                 return "Email is required";
             }
 
-            if (isBlank(userName)) {
+            if (isBlank(username)) {
                 return "Full name is required";
             }
 
-            if (isBlank(inputPassword)) {
+            if (isBlank(inputpassword)) {
                 return "Password is required";
             }
 
@@ -194,25 +182,18 @@ public class Application extends Controller {
                 user = User.authenticate(loginForm.get().email, loginForm.get().password);
             }
             catch (IllegalStateException e){
-               // return ok("{\"status\" : \"failure\", \"message\" : \"invalid email or password\"}");
                 return Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_01")).build())));
             }
             catch (AppException e ) {
-                //return Messages.get("error.technical");
-               // return ok("{\"status\" : \"failure\", \"message\" : \"technical error. please check config\"}");
                 return Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_02")).build())));
             }
-            /*session("email", loginForm.get().email);
-            User user = User.findByEmail(loginForm.get().email);
-            //return GO_DASHBOARD;*/
             if(user != null){
-                //return jsonResult(ok(STATUS_SUCCESS + DATA+ play.libs.Json.toJson(user) + LOGIN_SUCCESS ));
                 user.auth_key = UUID.randomUUID().toString()+ user.passwordHash;
                 user.save();
                 session("email", loginForm.get().email);
@@ -224,7 +205,6 @@ public class Application extends Controller {
             }
 
         }
-        //return ok("{\"status\" : \"failure\", \"message\" : \"Invalid email or passoword\"}");
         return Application.jsonResult(ok(play.libs.Json.toJson
                 (models.Response.responseBuilder.aresponse().
                         withStatus(Messages.get("application.response.status.failure")).
@@ -247,15 +227,11 @@ public class Application extends Controller {
             session().clear();
         }
         catch (Exception e){
-            //return ok("{\"status\" : \"failure\", \"message\" : \"authorization key\"}");
             return Application.jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_03")).build())));
         }
-        //flash("success", Messages.get("youve.been.logged.out"));
-        //return jsonResult(ok(STATUS_SUCCESS+LOGOUT_SUCCESS));
-        //return GO_HOME;
         return Application.jsonResult(ok(play.libs.Json.toJson
                 (models.Response.responseBuilder.aresponse().
                         withStatus(Messages.get("application.response.status.success")).
