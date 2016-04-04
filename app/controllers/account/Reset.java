@@ -13,13 +13,8 @@ import play.data.validation.Constraints;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.account.reset.ask;
 import play.libs.mailer.MailerClient;
-
 import javax.inject.Inject;
-
-import views.html.account.reset.reset;
-
 import java.net.MalformedURLException;
 import java.util.UUID;
 
@@ -69,7 +64,7 @@ public class Reset extends Controller {
      */
     public Result ask() {
         Form<AskForm> askForm = form(AskForm.class);
-        return ok(ask.render(askForm));
+        return ok();
     }
 
     /**
@@ -151,25 +146,25 @@ public class Reset extends Controller {
         if (token == null) {
             flash("error", Messages.get("error.technical"));
             Form<AskForm> askForm = form(AskForm.class);
-            return badRequest(ask.render(askForm));
+            return badRequest();
         }
 
         Token resetToken = Token.findByTokenAndType(token, Token.TypeToken.password);
         if (resetToken == null) {
             flash("error", Messages.get("error.technical"));
             Form<AskForm> askForm = form(AskForm.class);
-            return badRequest(ask.render(askForm));
+            return badRequest();
         }
 
         if (resetToken.isExpired()) {
             resetToken.delete();
             flash("error", Messages.get("error.expiredresetlink"));
             Form<AskForm> askForm = form(AskForm.class);
-            return badRequest(ask.render(askForm));
+            return badRequest();
         }
 
         Form<ResetForm> resetForm = form(ResetForm.class);
-        return ok(reset.render(resetForm, token));
+        return ok();
     }
 
     public Result changePassword(String auth_key){
@@ -242,20 +237,20 @@ public class Reset extends Controller {
 
         if (resetForm.hasErrors()) {
             flash("error", Messages.get("signup.valid.password"));
-            return badRequest(reset.render(resetForm, token));
+            return badRequest();
         }
 
         try {
             Token resetToken = Token.findByTokenAndType(token, Token.TypeToken.password);
             if (resetToken == null) {
                 flash("error", Messages.get("error.technical"));
-                return badRequest(reset.render(resetForm, token));
+                return badRequest();
             }
 
             if (resetToken.isExpired()) {
                 resetToken.delete();
                 flash("error", Messages.get("error.expiredresetlink"));
-                return badRequest(reset.render(resetForm, token));
+                return badRequest();
             }
 
             // check email
@@ -264,7 +259,7 @@ public class Reset extends Controller {
                 // display no detail (email unknown for example) to
                 // avoir check email by foreigner
                 flash("error", Messages.get("error.technical"));
-                return badRequest(reset.render(resetForm, token));
+                return badRequest();
             }
 
             String password = resetForm.get().inputPassword;
@@ -273,13 +268,13 @@ public class Reset extends Controller {
             // Send email saying that the password has just been changed.
             sendPasswordChanged(user);
             flash("success", Messages.get("resetpassword.success"));
-            return ok(reset.render(resetForm, token));
+            return ok();
         } catch (AppException e) {
             flash("error", Messages.get("error.technical"));
-            return badRequest(reset.render(resetForm, token));
+            return badRequest();
         } catch (EmailException e) {
             flash("error", Messages.get("error.technical"));
-            return badRequest(reset.render(resetForm, token));
+            return badRequest();
         }
 
     }

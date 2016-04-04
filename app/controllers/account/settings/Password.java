@@ -8,7 +8,6 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
-import views.html.account.settings.password;
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerClient;
 
@@ -31,7 +30,7 @@ public class Password extends Controller {
      * @return index settings
      */
     public Result index() {
-        return ok(password.render(User.findByEmail(request().username())));
+        return ok();
     }
 
     /**
@@ -45,11 +44,11 @@ public class Password extends Controller {
             Token t = new Token();
             t.sendMailResetPassword(user,mailerClient);
             flash("success", Messages.get("resetpassword.mailsent"));
-            return ok(password.render(user));
+            return ok();
         } catch (MalformedURLException e) {
             Logger.error("Cannot validate URL", e);
             flash("error", Messages.get("error.technical"));
         }
-        return badRequest(password.render(user));
+        return badRequest();
     }
 }

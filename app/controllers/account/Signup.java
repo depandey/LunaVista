@@ -19,9 +19,6 @@ import play.libs.mailer.MailerClient;
 import javax.inject.Inject;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
-import views.html.account.signup.confirm;
-import views.html.account.signup.create;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -51,7 +48,7 @@ public class Signup extends Controller {
      * @return create form
      */
     public Result create() {
-        return ok(create.render(form(Application.Register.class)));
+        return ok();
     }
 
     /**
@@ -60,7 +57,7 @@ public class Signup extends Controller {
      * @return create form
      */
     public Result createFormOnly() {
-        return ok(create.render(form(Application.Register.class)));
+        return ok();
     }
 
     /**
@@ -145,7 +142,7 @@ public class Signup extends Controller {
                                     withMessage(Messages.get("signup successful")).build())));
                 } else {
                     Logger.debug("Signup.confirm cannot confirm user");
-                    return badRequest(confirm.render());
+                    return badRequest();
                 }
         }
         catch (Exception e) {
@@ -279,21 +276,21 @@ public class Signup extends Controller {
     public Result confirm(String token) {
         User user = User.findByConfirmationToken(token);
         if (user == null) {
-            return badRequest(confirm.render());
+            return badRequest();
         }
 
         if (user.validated) {
-            return badRequest(confirm.render());
+            return badRequest();
         }
 
         try {
             if (User.confirm(user)) {
                 sendMailConfirmation(user);
                 flash("success", Messages.get("account.successfully.validated"));
-                return ok(confirm.render());
+                return ok();
             } else {
                 Logger.debug("Signup.confirm cannot confirm user");
-                return badRequest(confirm.render());
+                return badRequest();
             }
         } catch (AppException e) {
             Logger.error("Cannot signup", e);
@@ -302,7 +299,7 @@ public class Signup extends Controller {
             Logger.debug("Cannot send email", e);
             flash("error", Messages.get("error.sending.confirm.email"));
         }
-        return badRequest(confirm.render());
+        return badRequest();
     }
 
     /**

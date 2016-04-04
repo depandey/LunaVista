@@ -1,6 +1,5 @@
 package controllers;
 
-import models.Urls;
 import models.User;
 import models.utils.AppException;
 import play.Logger;
@@ -9,8 +8,7 @@ import play.data.validation.Constraints;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.admin;
-import views.html.index;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +28,7 @@ public class Application extends Controller {
     public static Result GO_HOME_ADMIN = redirect(routes.Application.admin());
 
     public static Result GO_DASHBOARD = redirect(
-            routes.Dashboard.index()
+            routes.Application.index()
     );
 
     /**
@@ -63,7 +61,7 @@ public class Application extends Controller {
             }
         }
 
-        return ok(index.render(form(Register.class), form(Login.class)));
+        return ok();
     }
 
     /**
@@ -72,7 +70,7 @@ public class Application extends Controller {
      * @return login page or dashboard
      */
     public Result admin() {
-        return ok(admin.render(form(Login.class)));
+        return ok();
     }
 
     /**
@@ -168,7 +166,7 @@ public class Application extends Controller {
     /**
      * Handle login form submission.
      *
-     * @return Dashboard if auth OK or login form if auth KO
+     * @return if auth OK or login form if auth KO
      */
     public Result authenticate() {
         Form<Login> loginForm = form(Login.class).bindFromRequest();
@@ -176,7 +174,7 @@ public class Application extends Controller {
         Form<Register> registerForm = form(Register.class);
 
         if (loginForm.hasErrors()) {
-            return badRequest(index.render(registerForm, loginForm));
+            return badRequest();
         } else {
             User user = null;
             try {
@@ -237,18 +235,5 @@ public class Application extends Controller {
                 (models.Response.responseBuilder.aresponse().
                         withStatus(Messages.get("application.response.status.success")).
                         withMessage(Messages.get("application.response.status.success.message.SUCCESS_02")).build())));
-    }
-
-    public Result getUrls(String auth_key){
-        User user = User.findByAuthKey(auth_key);
-        if(user != null){
-            List<Urls> urls = Urls.getAll();
-            return Application.jsonResult(ok(play.libs.Json.toJson
-                    (models.Response.responseBuilder.aresponse().
-                            withStatus(Messages.get("application.response.status.success")).
-                            withData(urls).
-                            withMessage(Messages.get("application.response.status.success.message.SUCCESS_02")).build())));
-        }
-        return ok();
     }
 }

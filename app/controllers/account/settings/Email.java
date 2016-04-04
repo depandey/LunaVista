@@ -10,8 +10,6 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
-import views.html.account.settings.email;
-import views.html.account.settings.emailValidate;
 import play.libs.mailer.MailerClient;
 
 import javax.inject.Inject;
@@ -51,7 +49,7 @@ public class Email extends Controller {
         User user = User.findByEmail(request().username());
         Form<AskForm> askForm = form(AskForm.class);
         askForm = askForm.fill(new AskForm(user.email));
-        return ok(email.render(User.findByEmail(request().username()), askForm));
+        return ok();
     }
 
     /**
@@ -65,7 +63,7 @@ public class Email extends Controller {
 
         if (askForm.hasErrors()) {
             flash("error", Messages.get("signup.valid.email"));
-            return badRequest(email.render(user, askForm));
+            return badRequest();
         }
 
         try {
@@ -73,12 +71,12 @@ public class Email extends Controller {
             Token t = new Token();
             t.sendMailChangeMail(user, mail,mailerClient);
             flash("success", Messages.get("changemail.mailsent"));
-            return ok(email.render(user, askForm));
+            return ok();
         } catch (MalformedURLException e) {
             Logger.error("Cannot validate URL", e);
             flash("error", Messages.get("error.technical"));
         }
-        return badRequest(email.render(user, askForm));
+        return badRequest();
     }
 
     /**
@@ -91,19 +89,19 @@ public class Email extends Controller {
 
         if (token == null) {
             flash("error", Messages.get("error.technical"));
-            return badRequest(emailValidate.render(user));
+            return badRequest();
         }
 
         Token resetToken = Token.findByTokenAndType(token, Token.TypeToken.email);
         if (resetToken == null) {
             flash("error", Messages.get("error.technical"));
-            return badRequest(emailValidate.render(user));
+            return badRequest();
         }
 
         if (resetToken.isExpired()) {
             resetToken.delete();
             flash("error", Messages.get("error.expiredmaillink"));
-            return badRequest(emailValidate.render(user));
+            return badRequest();
         }
 
         user.email = resetToken.email;
@@ -113,6 +111,6 @@ public class Email extends Controller {
 
         flash("success", Messages.get("account.settings.email.successful", user.email));
 
-        return ok(emailValidate.render(user));
+        return ok();
     }
 }

@@ -180,42 +180,6 @@ public class User extends Model {
             return email;
         }
 
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getCountry() {
-            return country;
-        }
-
-        public void setCountry(String country) {
-            this.country = country;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getCreatedon() {
-            return createdon;
-        }
-
-        public void setCreatedon(String createdon) {
-            this.createdon = createdon;
-        }
-
-        public String getAuth_key() {
-            return auth_key;
-        }
-
-        public void setAuth_key(String auth_key) {
-            this.auth_key = auth_key;
-        }
-
         private String auth_key;
 
         private String getDate(Date date) {
