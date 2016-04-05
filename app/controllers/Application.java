@@ -181,33 +181,39 @@ public class Application extends Controller {
                 user = User.authenticate(loginForm.get().email, loginForm.get().password);
             }
             catch (IllegalStateException e){
-                return Application.jsonResult(ok(play.libs.Json.toJson
+                Result result = Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_01")).build())));
+                return result;
             }
             catch (AppException e ) {
-                return Application.jsonResult(ok(play.libs.Json.toJson
+                Result result = Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("application.response.status.failure.message.ERROR_02")).build())));
+                return result;
             }
             if(user != null){
                 user.auth_key = UUID.randomUUID().toString()+ user.passwordhash;
                 user.save();
                 session("email", loginForm.get().email);
-                return (user.admin == true)? GO_DASHBOARD: Application.jsonResult(ok(play.libs.Json.toJson
+                String status =  Messages.get("application.response.status.success");
+                String message = Messages.get("application.response.status.success.message.SUCCESS_01");
+                Result result = (user.admin == true)? GO_DASHBOARD: Application.jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
-                                withStatus(Messages.get("application.response.status.success")).
+                                withStatus(status).
                                 withData(user).
-                                withMessage(Messages.get("application.response.status.success.message.SUCCESS_01")).build())));
+                                withMessage(message).build())));
+                return result;
             }
 
         }
-        return Application.jsonResult(ok(play.libs.Json.toJson
+        Result result = Application.jsonResult(ok(play.libs.Json.toJson
                 (models.Response.responseBuilder.aresponse().
                         withStatus(Messages.get("application.response.status.failure")).
                         withMessage(Messages.get("application.response.status.failure.message.ERROR_01")).build())));
+        return result;
     }
 
     /**
@@ -226,14 +232,21 @@ public class Application extends Controller {
             session().clear();
         }
         catch (Exception e){
-            return Application.jsonResult(ok(play.libs.Json.toJson
+            Result result = Application.jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("application.response.status.failure.message.ERROR_03")).build())));
+            return result;
         }
-        return Application.jsonResult(ok(play.libs.Json.toJson
+        Result result = Application.jsonResult(ok(play.libs.Json.toJson
                 (models.Response.responseBuilder.aresponse().
                         withStatus(Messages.get("application.response.status.success")).
                         withMessage(Messages.get("application.response.status.success.message.SUCCESS_02")).build())));
+        return result;
+    }
+
+    public Result listAll(Long id){
+
+        return Application.jsonResult(ok(play.libs.Json.toJson(User.findById(id))));
     }
 }

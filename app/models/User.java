@@ -1,16 +1,19 @@
 package models;
 
+import com.avaje.ebean.annotation.CreatedTimestamp;
+import com.avaje.ebean.annotation.UpdatedTimestamp;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import models.utils.AppException;
 import models.utils.Hash;
 import play.data.format.Formats;
 import play.data.validation.Constraints;
 import com.avaje.ebean.Model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: yesnault
@@ -58,6 +61,8 @@ public class User extends Model {
     public String passwordhash;
 
     @Formats.DateTime(pattern = "dd-MM-yyyy")
+    @CreatedTimestamp
+    @Column(name = "created")
     public Date dateCreation;
 
     @Formats.NonEmpty
@@ -68,6 +73,57 @@ public class User extends Model {
 
     public String auth_key;
 
+
+    @Column(name="about_me", length=255)
+    public String aboutMe;
+
+    @Temporal(TemporalType.DATE)
+    public Date birthday;
+
+    @Column(length=100)
+    public String city;
+
+    @Column(length=1)
+    public String gender;
+
+    @Column(length=100)
+    public String name;
+
+    @Lob
+    @Column(name="profile_picture", nullable=false)
+    public byte[] profilePicture;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @UpdatedTimestamp
+    public Date updated;
+
+
+    //bi-directional many-to-one association to Recording
+    @OneToMany(mappedBy="user1")
+    @JsonManagedReference
+    public List<Recording> recordings;
+
+    //bi-directional many-to-one association to Comment
+    @OneToMany(mappedBy="user")
+    @JsonManagedReference
+    public List<Comment> comments;
+
+    //bi-directional many-to-one association to Membership
+    @OneToOne
+    @JsonManagedReference
+    @JoinColumn(name="membership", nullable=false)
+    public Membership membership;
+
+    //bi-directional many-to-one association to UserRelationship
+    @OneToMany(mappedBy="follower")
+    @JsonManagedReference
+    public List<UserRelationship> follower;
+
+    //bi-directional many-to-one association to UserRelationship
+    @OneToMany(mappedBy="following")
+    @JsonManagedReference
+    public List<UserRelationship> following;
+
     public void deleteAuth_key() {
         this.auth_key = null;
         save();
@@ -75,6 +131,11 @@ public class User extends Model {
 
     // -- Queries (long id, user.class)
     public static Model.Finder<Long, User> find = new Model.Finder<Long, User>(Long.class, User.class);
+
+
+    public static User findById(Long id){
+        return find.byId(id);
+    }
 
     /**
      * Retrieve a user from an email.

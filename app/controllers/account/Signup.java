@@ -162,46 +162,52 @@ public class Signup extends Controller {
 
     public Result update(String auth_key){
         User user = User.findByAuthKey(auth_key);
+        Result result = null;
         if(user == null){
-            return jsonResult(ok(play.libs.Json.toJson
+            result = jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("invalid auth token")).build())));
+            return result;
         }
         JsonNode jsonNode = request().body().asJson();
         if(null == jsonNode){
-            return jsonResult(ok(play.libs.Json.toJson
+            result = jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.failure")).
                             withMessage(Messages.get("please provide data")).build())));
+            return result;
         }
         else{
             String firstName = jsonNode.findPath("firstname").asText();
             if(null == firstName || firstName.trim().isEmpty()){
-                return jsonResult(ok(play.libs.Json.toJson
+                result = jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("first name should not be empty")).build())));
+                return result;
             }
             else{
                 user.firstname = firstName;
             }
             String lastName = jsonNode.findPath("lastname").asText();
             if(null == lastName || lastName.trim().isEmpty()){
-                return jsonResult(ok(play.libs.Json.toJson
+                result = jsonResult(ok(play.libs.Json.toJson
                         (models.Response.responseBuilder.aresponse().
                                 withStatus(Messages.get("application.response.status.failure")).
                                 withMessage(Messages.get("last name should not be empty")).build())));
+                return result;
             }
             else{
                 user.lastname = lastName;
             }
             user.update();
-            return Application.jsonResult(ok(play.libs.Json.toJson
+            result = Application.jsonResult(ok(play.libs.Json.toJson
                     (models.Response.responseBuilder.aresponse().
                             withStatus(Messages.get("application.response.status.success")).
                             withData(user).
                             withMessage(Messages.get("update successful")).build())));
+            return result;
         }
 
     }
